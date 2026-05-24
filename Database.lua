@@ -316,7 +316,6 @@ RareTrackerSW_Data = {
     ["Geopriest Gukk\'rok"] = { level = "19", type = "rare", respawn = "2.0 h", x = 0.432, y = 0.521, id = "5863" },
     ["Harb Foulmountain"] = { level = "27", type = "rare", respawn = "5.0 h", x = 0.463, y = 0.968, id = "14426" },
     ["Heggin Stonewhisker"] = { level = "24", type = "rare", respawn = "4.0 h", x = 0.472, y = 0.841, id = "5847" },
-    ["Jal'akar"] = { level = "50", type = "rare", respawn = "15 h", x = 0.534, y = 0.343, id = "49010" },
     ["Rathorian"] = { level = "15", type = "rare", respawn = "1.5 h", x = 0.48, y = 0.192, id = "3470" },
     ["Silithid Harvester"] = { level = "24", type = "rare", respawn = "1.5 h", x = 0.431, y = 0.701, id = "3253" },
     ["Sludge Beast"] = { level = "19", type = "rare", respawn = "4.0 h", x = 0.564, y = 0.078, id = "3295" },
@@ -326,6 +325,7 @@ RareTrackerSW_Data = {
   },
   ["The Hinterlands"] = {
     ["Ironback"] = { level = "51", type = "rare", respawn = "10.5 h", x = 0.815, y = 0.492, id = "8213" },
+    ["Jal'akar"] = { level = "50", type = "rareelite", respawn = "15.0 h", x = 0.540, y = 0.342, id = "49010" },
     ["Jalinde Summerdrake"] = { level = "49", type = "rare", respawn = "5.0 h", x = 0.303, y = 0.479, id = "8214" },
     ["Old Cliff Jumper"] = { level = "42", type = "rare", respawn = "10.5 h", x = 0.119, y = 0.537, id = "8211" },
     ["Razortalon"] = { level = "44", type = "rare", respawn = "21.0 h", x = 0.371, y = 0.453, id = "8210" },
