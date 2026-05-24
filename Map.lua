@@ -350,7 +350,10 @@ function RareTrackerSW_Map:UpdateWorldMap()
     local zoneMapId = RTSW_ZoneToMapId[zName]
 
     for name, mob in pairs(data) do
-        if mob.faction and mob.faction ~= "N" and mob.faction == pFacCode then
+        local isAllied = RareTrackerSW_AlliedMobs and RareTrackerSW_AlliedMobs[name]
+        if isAllied then
+            -- pular mob ignorado pelo jogador
+        elseif mob.faction and mob.faction ~= "N" and mob.faction == pFacCode then
             -- pular mob amigável
         else
             local timer  = RareTrackerSW_Timers and RareTrackerSW_Timers[name] or 0
