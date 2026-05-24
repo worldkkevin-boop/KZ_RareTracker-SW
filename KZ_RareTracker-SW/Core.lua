@@ -13,8 +13,8 @@ RareTrackerSW_DB = RareTrackerSW_DB or {}
 if RareTrackerSW_ChatEnabled    == nil then RareTrackerSW_ChatEnabled    = false end
 if RareTrackerSW_AlertEnabled   == nil then RareTrackerSW_AlertEnabled   = true end
 if RareTrackerSW_SoundEnabled   == nil then RareTrackerSW_SoundEnabled   = true end
-if RareTrackerSW_ShowDeadOnMap  == nil then RareTrackerSW_ShowDeadOnMap  = true end
-if RareTrackerSW_HideAllied     == nil then RareTrackerSW_HideAllied     = false end
+if RareTrackerSW_ShowDeadOnMap    == nil then RareTrackerSW_ShowDeadOnMap    = true end
+if RareTrackerSW_HideIgnoredOnMap == nil then RareTrackerSW_HideIgnoredOnMap = false end
 
 local function RTSW_Chat(msg)
     if RareTrackerSW_ChatEnabled ~= false then

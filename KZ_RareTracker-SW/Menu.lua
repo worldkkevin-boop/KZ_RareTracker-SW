@@ -328,11 +328,11 @@ function RareTrackerSW_Menu:Init()
         end)
     end
 
-    CreateCB("Alerta Visual",    "RareTrackerSW_AlertEnabled",  10,  -10)
-    CreateCB("Som Ativado",      "RareTrackerSW_SoundEnabled",  10,  -38)
-    CreateCB("Mostrar Mortos",   "RareTrackerSW_ShowDeadOnMap", 280, -10)
-    CreateCB("Esconder Aliados", "RareTrackerSW_HideAllied",    280, -38)
-    CreateCB("Mensagens no Chat","RareTrackerSW_ChatEnabled",   280, -66)
+    CreateCB("Alerta Visual",       "RareTrackerSW_AlertEnabled",     10,  -10)
+    CreateCB("Som Ativado",         "RareTrackerSW_SoundEnabled",     10,  -38)
+    CreateCB("Mostrar Mortos",      "RareTrackerSW_ShowDeadOnMap",   280,  -10)
+    CreateCB("Ocultar no mapa ao ignorar", "RareTrackerSW_HideIgnoredOnMap", 280, -38)
+    CreateCB("Mensagens no Chat",   "RareTrackerSW_ChatEnabled",     280,  -66)
 
     local cfgDiv = configPanel:CreateTexture(nil, "ARTWORK")
     cfgDiv:SetTexture(0.8, 0.7, 0.2, 0.35)
