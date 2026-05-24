@@ -609,10 +609,10 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
         custom    = "Interface\\Icons\\INV_Misc_MonsterScales_13",
     }
     local pinColors = {
-        rare      = {1, 1, 1},
-        rareelite = {0.5, 0.8, 1},
-        elite     = {1, 0.8, 0},
-        worldboss = {1, 0.2, 0.2},
+        rare      = {0.12, 1,    0   },
+        rareelite = {0,    0.44, 0.87},
+        elite     = {1,    0.4,  0   },
+        worldboss = {1,    0,    0   },
         custom    = {0.8, 0, 1},
     }
     local function GetDisplayType(mob, name)
