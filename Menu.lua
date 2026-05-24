@@ -849,12 +849,8 @@ function RareTrackerSW_Menu:RefreshLootDB()
                 RTSW_LootExpanded[mobName] = not RTSW_LootExpanded[mobName]
                 RareTrackerSW_Menu:RefreshLootDB()
             end)
-            row:SetScript("OnEnter", function()
-                this.fs:SetText(string.gsub(this.fs:GetText(), "^|cffaaaaaa[▶▼]|r ", "|cffffff00" .. (RTSW_LootExpanded[mobName] and "▼" or "▶") .. "|r "))
-            end)
-            row:SetScript("OnLeave", function()
-                this.fs:SetText(line.text)
-            end)
+            row:SetScript("OnEnter", nil)
+            row:SetScript("OnLeave", nil)
         elseif line.itemId then
             -- clique no item: abre classicdb / tooltip
             local itemId   = line.itemId
