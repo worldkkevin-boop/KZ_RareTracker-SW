@@ -6,10 +6,9 @@ function RTSW_TOGGLE()
     RareTrackerSW_MenuHandler("")
 end
 -- RareTracker-SW Core Logic
-RTSW_VERSION = "1.3.1"
+RTSW_VERSION = "1.3.2"
 RareTrackerSW_Timers = RareTrackerSW_Timers or {}
 RareTrackerSW_Killers = RareTrackerSW_Killers or {}
-RareTrackerSW_Ranks = RareTrackerSW_Ranks or {}
 RareTrackerSW_DB = RareTrackerSW_DB or {}
 if RareTrackerSW_ChatEnabled    == nil then RareTrackerSW_ChatEnabled    = false end
 if RareTrackerSW_AlertEnabled   == nil then RareTrackerSW_AlertEnabled   = true end
@@ -187,22 +186,16 @@ function RareTrackerSW:RecordDeath(name, fromSync, killer, isManual)
             return
         end
 
-        if not RareTrackerSW_Ranks then RareTrackerSW_Ranks = {} end
         local killerStr
         if isManual then
-            -- Morte manual: não registra killer nem soma no rank
             killerStr = nil
         elseif not fromSync then
             local groupMembers = RareTrackerSW:GetGroupMembers()
             if table.getn(groupMembers) > 1 then
                 table.sort(groupMembers)
                 killerStr = table.concat(groupMembers, ",")
-                for _, m in ipairs(groupMembers) do
-                    RareTrackerSW_Ranks[m] = (RareTrackerSW_Ranks[m] or 0) + 1
-                end
             else
                 killerStr = killer or UnitName("player") or "?"
-                RareTrackerSW_Ranks[killerStr] = (RareTrackerSW_Ranks[killerStr] or 0) + 1
             end
         else
             killerStr = killer or "?"
