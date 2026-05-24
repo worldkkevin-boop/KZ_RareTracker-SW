@@ -6,12 +6,12 @@ function RTSW_TOGGLE()
     RareTrackerSW_MenuHandler("")
 end
 -- RareTracker-SW Core Logic
-RTSW_VERSION = "1.3.1"
+RTSW_VERSION = GetAddOnMetadata("KZ_RareTracker-SW", "Version") or "?"
 RareTrackerSW_Timers = RareTrackerSW_Timers or {}
 RareTrackerSW_Killers = RareTrackerSW_Killers or {}
 RareTrackerSW_Ranks = RareTrackerSW_Ranks or {}
 RareTrackerSW_DB = RareTrackerSW_DB or {}
-if RareTrackerSW_ChatEnabled    == nil then RareTrackerSW_ChatEnabled    = true end
+if RareTrackerSW_ChatEnabled    == nil then RareTrackerSW_ChatEnabled    = false end
 if RareTrackerSW_AlertEnabled   == nil then RareTrackerSW_AlertEnabled   = true end
 if RareTrackerSW_SoundEnabled   == nil then RareTrackerSW_SoundEnabled   = true end
 if RareTrackerSW_ShowDeadOnMap  == nil then RareTrackerSW_ShowDeadOnMap  = true end
