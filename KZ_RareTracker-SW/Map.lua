@@ -46,7 +46,7 @@ RTSW_SeekFrame:SetScript("OnUpdate", function()
     this.timeLeft = this.timeLeft - arg1
     if this.timeLeft <= 0 then
         this.active = false
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cffff6666" .. (this.mobName or "?") .. " fora de alcance.|r")
+        if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cffff6666" .. (this.mobName or "?") .. " fora de alcance.|r") end
         return
     end
     this.nextTry = this.nextTry - arg1
@@ -55,7 +55,7 @@ RTSW_SeekFrame:SetScript("OnUpdate", function()
         TargetByName(this.mobName)
         if UnitExists("target") and UnitName("target") == this.mobName then
             this.active = false
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cff44ff44" .. this.mobName .. " alvejado!|r")
+            if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cff44ff44" .. this.mobName .. " alvejado!|r") end
         end
     end
 end)
@@ -64,14 +64,14 @@ function RTSW_SeekMob(mobName)
     if RTSW_SeekFrame.active and RTSW_SeekFrame.mobName == mobName then
         -- Segundo clique cancela a busca
         RTSW_SeekFrame.active = false
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Busca cancelada.")
+        if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Busca cancelada.") end
         return
     end
     RTSW_SeekFrame.mobName  = mobName
     RTSW_SeekFrame.active   = true
     RTSW_SeekFrame.timeLeft = 10
     RTSW_SeekFrame.nextTry  = 0
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Buscando |cffff8000" .. mobName .. "|r por 10s... (clique de novo para cancelar)")
+    if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Buscando |cffff8000" .. mobName .. "|r por 10s... (clique de novo para cancelar)") end
 end
 
 -- ============================================================
@@ -1028,12 +1028,12 @@ qpMoveBtn:SetScript("OnClick", function()
                 RareTrackerSW_DB[zone][n].y = newY
             end
             if RareTrackerSW_Sync then RareTrackerSW_Sync:SendFound(n, newX, newY) end
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Posicao de |cffff8000" .. n .. "|r salva: " .. string.format("%.1f, %.1f", newX*100, newY*100))
+            if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Posicao de |cffff8000" .. n .. "|r salva: " .. string.format("%.1f, %.1f", newX*100, newY*100)) end
         end
         RareTrackerSW_Map:UpdateWorldMap()
     end)
 
-    DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[RareTracker]|r Arraste o pin verde para a posicao correta.")
+    if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[RareTracker]|r Arraste o pin verde para a posicao correta.") end
 end)
 
 function RTSW_OpenQuickPanel(pin)

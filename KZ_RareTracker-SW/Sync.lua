@@ -171,7 +171,9 @@ function RareTrackerSW_Sync:OnSyncMessage(msg, sender)
             end
 
             -- Mensagem formatada no chat do usuario
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RT Sync]|r |cffff8000" .. name .. "|r eliminado por |cff00ff00" .. displayKiller .. "|r! Respawn: |cffffff00" .. respawnStr .. "|r")
+            if RareTrackerSW_ChatEnabled ~= false then
+                DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RT Sync]|r |cffff8000" .. name .. "|r eliminado por |cff00ff00" .. displayKiller .. "|r! Respawn: |cffffff00" .. respawnStr .. "|r")
+            end
 
             if RareTrackerSW_Map then RareTrackerSW_Map:UpdateWorldMap() end
             if RareTrackerSW_Menu and RareTrackerSW_Menu:IsShown() then
@@ -183,7 +185,9 @@ function RareTrackerSW_Sync:OnSyncMessage(msg, sender)
     elseif action == "FOUND" then
         local xCoord = tonumber(v1) or 0
         local yCoord = tonumber(v2) or 0
-        DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[RT Sync]|r |cff00ff00" .. sender .. "|r encontrou |cffff8000" .. name .. "|r em " .. v1 .. ", " .. v2 .. "!")
+        if RareTrackerSW_ChatEnabled ~= false then
+            DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[RT Sync]|r |cff00ff00" .. sender .. "|r encontrou |cffff8000" .. name .. "|r em " .. v1 .. ", " .. v2 .. "!")
+        end
 
         local isRare, zone = RareTrackerSW and RareTrackerSW:IsRare(name)
         if isRare and zone then
@@ -238,7 +242,9 @@ function RareTrackerSW_Sync:OnSyncMessage(msg, sender)
             RareTrackerSW_LootDB[name] = { kills = 0, items = {} }
         end
         RareTrackerSW_LootDB[name].kills = (RareTrackerSW_LootDB[name].kills or 0) + 1
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RT Loot]|r |cff00ff00" .. sender .. "|r lootou |cffff8000" .. name .. "|r — kill registrado.")
+        if RareTrackerSW_ChatEnabled ~= false then
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RT Loot]|r |cff00ff00" .. sender .. "|r lootou |cffff8000" .. name .. "|r — kill registrado.")
+        end
 
     elseif action == "LOOTITEM" then
         -- formato: LOOTITEM:MobName:itemId:quality:itemName (name tem itemId, v1=quality, v2+ = itemName)
@@ -267,7 +273,7 @@ function RareTrackerSW_Sync:OnSyncMessage(msg, sender)
         local remoteVer = v1
         local localVer  = RTSW_VERSION or "0"
         if remoteVer and RareTrackerSW_Sync:IsNewerVersion(remoteVer, localVer) then
-            DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[RareTracker]|r |cffff8800Atualizacao disponivel!|r |cffffd700v" .. remoteVer .. "|r (voce tem v" .. localVer .. ") - Peca para " .. (v2 or sender))
+            if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cffffff00[RareTracker]|r |cffff8800Atualizacao disponivel!|r |cffffd700v" .. remoteVer .. "|r (voce tem v" .. localVer .. ") - Peca para " .. (v2 or sender)) end
         end
     end
 end
