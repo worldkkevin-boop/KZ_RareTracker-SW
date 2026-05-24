@@ -481,7 +481,7 @@ function RareTrackerSW_Map:UpdateMinimap()
         local isDead  = timer > time()
         local isAllied = RareTrackerSW_AlliedMobs and RareTrackerSW_AlliedMobs[name]
 
-        if (isDead and not RareTrackerSW_ShowDeadOnMap) or (isAllied and RareTrackerSW_HideAllied) then
+        if (isDead and not RareTrackerSW_ShowDeadOnMap) or isAllied then
             -- pula
         else
             local dt     = GetDisplayType(mob, name)
