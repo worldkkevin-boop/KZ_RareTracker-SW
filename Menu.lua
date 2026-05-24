@@ -127,8 +127,8 @@ function RareTrackerSW_Menu:Init()
 
     -- Título
     local title = self:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    title:SetPoint("TOP", self, "TOP", -60, -14)
-    title:SetText("|cffffff00RareTracker-SW|r |cff888888v" .. (RTSW_VERSION or "?") .. "|r")
+    title:SetPoint("TOP", self, "TOP", 0, -14)
+    title:SetText("|cFF2ecc40KZ|r |cffffff00RareTracker-SW|r |cff888888v" .. (RTSW_VERSION or "?") .. "|r")
 
     local closeBtn = CreateFrame("Button", nil, self, "UIPanelCloseButton")
     closeBtn:SetPoint("TOPRIGHT", self, "TOPRIGHT", -5, -5)

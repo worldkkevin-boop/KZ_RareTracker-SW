@@ -189,11 +189,12 @@ local function RTSW_DiffColor(mobLevel)
     local pLv = UnitLevel("player") or 1
     local ml  = tonumber(mobLevel) or pLv
     local d   = ml - pLv
-    if     d >= 5  then return "ff2020"
-    elseif d >= 3  then return "ff8040"
-    elseif d >= -2 then return "ffff00"
-    elseif d >= -7 then return "40c040"
-    else                return "808080"
+    local grayThresh = -(math.floor(pLv / 10) + 7)
+    if     d >= 5          then return "ff2020"
+    elseif d >= 3          then return "ff8040"
+    elseif d >= -2         then return "ffff00"
+    elseif d > grayThresh  then return "40c040"
+    else                        return "808080"
     end
 end
 
