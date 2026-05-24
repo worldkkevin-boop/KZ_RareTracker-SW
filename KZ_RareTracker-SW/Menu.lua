@@ -619,6 +619,7 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
         if not mob then return "rare" end
         if mob.type == "custom" then return "custom" end
         local id = tonumber(mob.id) or 0
+        if id >= 40000 then return "custom" end
         return mob.type or "rare"
     end
 
