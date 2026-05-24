@@ -137,7 +137,6 @@ function RareTrackerSW_Menu:Init()
     local tabDefs = {
         { key="raros",  label="|cffffff00Raros|r" },
         { key="config", label="Configurações" },
-        { key="rank",   label="Ranking" },
         { key="loot",   label="Loot DB" },
     }
     self.tabBtns = {}
@@ -289,26 +288,6 @@ function RareTrackerSW_Menu:Init()
     cfgDiv:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -95)
 
     local cfgBtns = {
-        { text="Sincronizar Agora", fn=function()
-            if RareTrackerSW_Sync then
-                RareTrackerSW_Sync:SendRequest()
-                if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Pedindo timers do canal...") end
-            end
-        end},
-        { text="Verificar Versao", fn=function()
-            if RareTrackerSW_Sync then
-                RareTrackerSW_Sync:SendVersion()
-                if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Verificando versoes... (v" .. (RTSW_VERSION or "?") .. ")") end
-            end
-        end},
-        { text="Compartilhar Raros", fn=function()
-            if RareTrackerSW_Sync then
-                RareTrackerSW_Sync:BroadcastDB()
-                local count = 0
-                if RareTrackerSW_DB then for z, mobs in pairs(RareTrackerSW_DB) do for n in pairs(mobs) do count = count + 1 end end end
-                if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Compartilhando " .. count .. " raros!") end
-            end
-        end},
         { text="? Ajuda", fn=function() RareTrackerSW_Menu:ToggleHelp() end},
         { text="Resetar Ignorados", fn=function()
             RareTrackerSW_AlliedMobs = {}
@@ -316,7 +295,7 @@ function RareTrackerSW_Menu:Init()
             if RareTrackerSW_Map then RareTrackerSW_Map:UpdateWorldMap() end
         end},
     }
-    local btnW, btnH, cols = 175, 26, 3
+    local btnW, btnH, cols = 175, 26, 2
     for i, bd in ipairs(cfgBtns) do
         local col = math.mod(i-1, cols)
         local row = math.floor((i-1) / cols)
@@ -389,42 +368,6 @@ function RareTrackerSW_Menu:Init()
         end
     end)
 
-    -- ===== ABA RANKING =====
-    local rankPanel = CreateFrame("Frame", nil, self)
-    rankPanel:SetPoint("TOPLEFT", self, "TOPLEFT", 16, -63)
-    rankPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -16, 28)
-    self.rankPanel = rankPanel
-    rankPanel:Hide()
-
-    local rankTitle = rankPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    rankTitle:SetPoint("TOP", rankPanel, "TOP", 0, -6)
-    rankTitle:SetText("|cffffff00Ranking de Kills|r")
-
-    local rankScroll = CreateFrame("ScrollFrame", "RTSW_RankScroll", rankPanel, "UIPanelScrollFrameTemplate")
-    rankScroll:SetPoint("TOPLEFT", rankPanel, "TOPLEFT", 10, -34)
-    rankScroll:SetPoint("BOTTOMRIGHT", rankPanel, "BOTTOMRIGHT", -30, 30)
-    rankScroll:EnableMouseWheel(true)
-    rankScroll:SetScript("OnMouseWheel", function()
-        local v = this:GetVerticalScroll() - (arg1 * 25)
-        if v < 0 then v = 0 end
-        local mx = this:GetVerticalScrollRange()
-        if v > mx then v = mx end
-        this:SetVerticalScroll(v)
-    end)
-    local rankContent = CreateFrame("Frame", nil, rankScroll)
-    rankContent:SetWidth(510) rankContent:SetHeight(1)
-    rankScroll:SetScrollChild(rankContent)
-    self.rankFrame = { scroll=rankScroll, content=rankContent }
-
-    local resetRankBtn = CreateFrame("Button", nil, rankPanel, "UIPanelButtonTemplate")
-    resetRankBtn:SetPoint("BOTTOM", rankPanel, "BOTTOM", 0, 2)
-    resetRankBtn:SetWidth(160) resetRankBtn:SetHeight(22)
-    resetRankBtn:SetText("Resetar Ranking")
-    resetRankBtn:SetScript("OnClick", function()
-        RareTrackerSW_Ranks = {}
-        RareTrackerSW_Menu:RefreshRanking()
-    end)
-
     -- ===== ABA LOOT DB =====
     local lootPanel = CreateFrame("Frame", nil, self)
     lootPanel:SetPoint("TOPLEFT", self, "TOPLEFT", 16, -63)
@@ -482,15 +425,11 @@ function RareTrackerSW_Menu:Init()
     function RareTrackerSW_Menu:ShowTab(tab)
         self.rarosPanel:Hide()
         self.configPanel:Hide()
-        self.rankPanel:Hide()
         self.lootPanel:Hide()
         if tab == "raros" then
             self.rarosPanel:Show()
         elseif tab == "config" then
             self.configPanel:Show()
-        elseif tab == "rank" then
-            self.rankPanel:Show()
-            RareTrackerSW_Menu:RefreshRanking()
         elseif tab == "loot" then
             self.lootPanel:Show()
         end
@@ -804,68 +743,6 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
     end
     self.detailPanel:SetHeight(offset > 0 and offset or 1)
     self.detailScroll:UpdateScrollChildRect()
-end
-
-function RareTrackerSW_Menu:RefreshRanking()
-    if not self.rankFrame then return end
-    local content = self.rankFrame.content
-
-    if not content.rows then content.rows = {} end
-    for _, r in ipairs(content.rows) do
-        r:Hide()
-        if r.label then r.label:SetText("") end
-        if r.killsLabel then r.killsLabel:SetText("") end
-    end
-
-    local sorted = {}
-    if RareTrackerSW_Ranks then
-        for name, kills in pairs(RareTrackerSW_Ranks) do
-            if kills and kills > 0 then
-                table.insert(sorted, {name=name, kills=kills})
-            end
-        end
-    end
-    table.sort(sorted, function(a, b) return a.kills > b.kills end)
-
-    local medals = {"|cffffd700#1|r", "|cffc0c0c0#2|r", "|cffcd7f32#3|r"}
-    local offset = 0
-    local count = table.getn(sorted)
-
-    if count == 0 then
-        if not content.emptyMsg then
-            content.emptyMsg = content:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            content.emptyMsg:SetPoint("CENTER", content, "CENTER", 0, -20)
-        end
-        content.emptyMsg:SetText("|cffaaaaaa(Nenhum kill registrado)|r")
-        content.emptyMsg:Show()
-        content:SetHeight(50)
-    else
-        if content.emptyMsg then content.emptyMsg:Hide() end
-        for i, entry in ipairs(sorted) do
-            local row = content.rows[i]
-            if not row then
-                row = CreateFrame("Frame", nil, content)
-                row:SetWidth(500) row:SetHeight(26)
-                row.label = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                row.label:SetPoint("LEFT", row, "LEFT", 6, 0)
-                row.killsLabel = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-                row.killsLabel:SetPoint("RIGHT", row, "RIGHT", -6, 0)
-                local line = row:CreateTexture(nil, "BACKGROUND")
-                line:SetHeight(1) line:SetWidth(500)
-                line:SetPoint("BOTTOM", row, "BOTTOM", 0, 0)
-                line:SetTexture(0.6, 0.55, 0.2, 0.25)
-                content.rows[i] = row
-            end
-            row:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -offset)
-            local rankStr = medals[i] or ("|cffaaaaaa#" .. i .. "|r")
-            row.label:SetText(rankStr .. " |cffffff00" .. entry.name .. "|r")
-            row.killsLabel:SetText("|cff00ff00" .. entry.kills .. " kills|r")
-            row:Show()
-            offset = offset + 26
-        end
-        content:SetHeight(offset > 0 and offset or 1)
-    end
-    self.rankFrame.scroll:UpdateScrollChildRect()
 end
 
 function RareTrackerSW_Menu:RefreshLootDB()
