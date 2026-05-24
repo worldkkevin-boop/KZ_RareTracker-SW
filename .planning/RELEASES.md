@@ -114,7 +114,8 @@ Tracker de mobs raros no minimapa com alertas e sincronização entre jogadores!
 Hey adventurers! We've developed a collection of free addons in Brazilian Portuguese for the SandWorlds server.
 
 🛠️ How to install
-Use GitAddonsManager and paste the link below — it installs everything automatically:
+1. Download GitAddonsManager: https://woblight.gitlab.io/overview/gitaddonsmanager/
+2. Paste the link below — it installs everything automatically:
 https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR.git
 
 ---
