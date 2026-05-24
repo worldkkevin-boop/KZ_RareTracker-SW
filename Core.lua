@@ -6,7 +6,7 @@ function RTSW_TOGGLE()
     RareTrackerSW_MenuHandler("")
 end
 -- RareTracker-SW Core Logic
-RTSW_VERSION = GetAddOnMetadata("KZ_RareTracker-SW", "Version") or "?"
+RTSW_VERSION = "1.3.1"
 RareTrackerSW_Timers = RareTrackerSW_Timers or {}
 RareTrackerSW_Killers = RareTrackerSW_Killers or {}
 RareTrackerSW_Ranks = RareTrackerSW_Ranks or {}
