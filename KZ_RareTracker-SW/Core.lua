@@ -165,7 +165,7 @@ function RareTrackerSW:ConvertRespawnToSeconds(str)
     return val
 end
 
-function RareTrackerSW:RecordDeath(name, fromSync, killer)
+function RareTrackerSW:RecordDeath(name, fromSync, killer, isManual)
     if not RareTrackerSW_Timers then RareTrackerSW_Timers = {} end
     if not RareTrackerSW_Killers then RareTrackerSW_Killers = {} end
 
@@ -176,15 +176,16 @@ function RareTrackerSW:RecordDeath(name, fromSync, killer)
             return
         end
 
-        -- Montar string de matadores (solo ou grupo) e atualizar ranks
         if not RareTrackerSW_Ranks then RareTrackerSW_Ranks = {} end
         local killerStr
-        if not fromSync then
+        if isManual then
+            -- Morte manual: não registra killer nem soma no rank
+            killerStr = nil
+        elseif not fromSync then
             local groupMembers = RareTrackerSW:GetGroupMembers()
             if table.getn(groupMembers) > 1 then
                 table.sort(groupMembers)
                 killerStr = table.concat(groupMembers, ",")
-                -- Creditar rank para cada membro do grupo
                 for _, m in ipairs(groupMembers) do
                     RareTrackerSW_Ranks[m] = (RareTrackerSW_Ranks[m] or 0) + 1
                 end
@@ -195,7 +196,9 @@ function RareTrackerSW:RecordDeath(name, fromSync, killer)
         else
             killerStr = killer or "?"
         end
-        RareTrackerSW_Killers[name] = killerStr
+        if killerStr then
+            RareTrackerSW_Killers[name] = killerStr
+        end
 
         local mobData = (RareTrackerSW_Data[zone] and RareTrackerSW_Data[zone][name]) or
                         (RareTrackerSW_DB[zone] and RareTrackerSW_DB[zone][name])
@@ -206,15 +209,23 @@ function RareTrackerSW:RecordDeath(name, fromSync, killer)
         end
 
         if seconds > 0 then
-            RareTrackerSW_Timers[name] = time() + seconds
+            -- Morte manual: CD pela metade (não sabemos quando realmente morreu)
+            local timerSeconds = isManual and math.floor(seconds / 2) or seconds
+            RareTrackerSW_Timers[name] = time() + timerSeconds
         else
-            RareTrackerSW_Timers[name] = time() + 3600
+            local timerSeconds = isManual and 1800 or 3600
+            RareTrackerSW_Timers[name] = time() + timerSeconds
+        end
+
+        -- Preparar detecção de loot para kills reais (não manual, não sync)
+        if not isManual and not fromSync then
+            RTSW_LastKilledRare = name
+            RTSW_LastKilledTime = GetTime()
         end
 
         if not fromSync then
-            -- Addon message para membros da guilda
-            SendAddonMessage("RTSW", "DEATH:"..name..":"..RareTrackerSW_Timers[name], "GUILD")
-            -- Canal de sync para TODOS os jogadores na area com o addon
+            local msgType = isManual and "MANUALDEATH" or "DEATH"
+            SendAddonMessage("RTSW", msgType..":"..name..":"..RareTrackerSW_Timers[name], "GUILD")
             if RareTrackerSW_Sync and RareTrackerSW_Sync.SendDeath then
                 RareTrackerSW_Sync:SendDeath(name, RareTrackerSW_Timers[name], killerStr)
             end
@@ -232,13 +243,17 @@ function RareTrackerSW:OnSync(prefix, msg, channel, sender)
     if not msg or prefix ~= "RTSW" then return end
     if sender == UnitName("player") then return end
 
-    local _, _, name, t = string.find(msg, "DEATH:(.+):(%d+)")
+    local isManualSync = string.find(msg, "^MANUALDEATH:") ~= nil
+    local _, _, name, t = string.find(msg, "[A-Z]+DEATH:(.+):(%d+)")
     if name and t then
         local timer = tonumber(t)
         if not RareTrackerSW_Timers[name] or timer > RareTrackerSW_Timers[name] then
             RareTrackerSW_Timers[name] = timer
             if not RareTrackerSW_Killers then RareTrackerSW_Killers = {} end
-            RareTrackerSW_Killers[name] = sender
+            -- Morte manual recebida: não atribuir como kill do sender
+            if not isManualSync then
+                RareTrackerSW_Killers[name] = sender
+            end
 
             -- Notificar no chat (via guilda/addon message)
             local respawnStr = "?"
@@ -290,19 +305,41 @@ function RareTrackerSW:AddCurrentTargetToDB()
     if not RareTrackerSW_DB then RareTrackerSW_DB = {} end
     if not RareTrackerSW_DB[zone] then RareTrackerSW_DB[zone] = {} end
 
-    RareTrackerSW_DB[zone][name] = {
-        level = UnitLevel("target"),
-        type = classification,
-        respawn = "15.0 h",
-        x = x,
-        y = y,
-        id = "0",
-        faction = "N",
-        custom = true
-    }
+    local existing = RareTrackerSW_DB[zone][name]
+    if existing then
+        -- Migrar formato antigo (x,y único) para spawns array
+        if not existing.spawns then
+            existing.spawns = {}
+            if existing.x and existing.y then
+                table.insert(existing.spawns, {x=existing.x, y=existing.y})
+                existing.x, existing.y = nil, nil
+            end
+        end
+        -- Adicionar novo ponto de spawn se não for duplicata
+        local isDup = false
+        for _, sp in ipairs(existing.spawns) do
+            if math.abs(sp.x - x) < 0.005 and math.abs(sp.y - y) < 0.005 then
+                isDup = true; break
+            end
+        end
+        if not isDup then
+            table.insert(existing.spawns, {x=x, y=y})
+        end
+    else
+        RareTrackerSW_DB[zone][name] = {
+            level   = UnitLevel("target"),
+            type    = classification,
+            respawn = "15.0 h",
+            id      = "0",
+            faction = "N",
+            custom  = true,
+            spawns  = { {x=x, y=y} },
+        }
+    end
 
     local coords = string.format("%.1f, %.1f", x*100, y*100)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[RT]|r " .. name .. " adicionado em " .. zone .. " (" .. coords .. ")")
+    local spawnCount = existing and existing.spawns and table.getn(existing.spawns) or 1
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[RT]|r " .. name .. " spawn salvo em " .. zone .. " (" .. coords .. ") — total: " .. spawnCount .. " ponto(s)")
 
     RareTrackerSW:BuildLookup()
 
@@ -385,7 +422,7 @@ RTSW_DeathFrame:SetScript("OnEvent", function()
                     if RareTrackerSW_Map and RareTrackerSW_Map.ShowTargetPin then
                         RareTrackerSW_Map:ShowTargetPin(RTSW_ActiveRare)
                     end
-                elseif SUPERWOW_VERSION and CanLootUnit(unit) then
+                elseif SUPERWOW_VERSION and CanLootUnit and CanLootUnit(unit) then
                     -- (4) Cadáver lootável de raro: registrar morte se ainda não registrada
                     local realName = rn or name
                     local timer = RareTrackerSW_Timers and RareTrackerSW_Timers[realName] or 0
@@ -510,4 +547,73 @@ if SUPERWOW_VERSION then
     end)
 
 end -- if SUPERWOW_VERSION
+
+-- ============================================================
+-- AUTO-LOOT DATABASE — registra drops ao lootar raros
+-- ============================================================
+local RTSW_LootFrame = CreateFrame("Frame")
+RTSW_LootFrame:RegisterEvent("LOOT_OPENED")
+RTSW_LootFrame:SetScript("OnEvent", function()
+    if event ~= "LOOT_OPENED" then return end
+    if not RTSW_LastKilledRare or not RTSW_LastKilledTime then return end
+    if GetTime() - RTSW_LastKilledTime > 120 then RTSW_LastKilledRare = nil; return end
+
+    -- Confirma que estamos lootando o mob correto (evita falso positivo quando outro player matou)
+    local tName = UnitName("target")
+    if tName and tName ~= RTSW_LastKilledRare then return end
+
+    local mobName = RTSW_LastKilledRare
+    RTSW_LastKilledRare = nil  -- limpa só após confirmar loot correto
+
+    if not RareTrackerSW_LootDB then RareTrackerSW_LootDB = {} end
+    if not RareTrackerSW_LootDB[mobName] then
+        RareTrackerSW_LootDB[mobName] = { kills = 0, items = {} }
+    end
+    local lootDB = RareTrackerSW_LootDB[mobName]
+    lootDB.kills = (lootDB.kills or 0) + 1
+
+    local numItems = GetNumLootItems()
+    local newItems = 0
+    for i = 1, numItems do
+        local texture, itemName, count, quality = GetLootSlotInfo(i)
+        if itemName and quality and quality >= 2 then  -- verde+ (ignora cinza e branco)
+            local itemId = "0"
+            if GetLootSlotLink then
+                local link = GetLootSlotLink(i)
+                if link then
+                    local _, _, id = string.find(link, "item:(%d+)")
+                    if id then itemId = id end
+                end
+            end
+
+            local found = false
+            for _, item in ipairs(lootDB.items) do
+                if item.name == itemName then
+                    item.drops = (item.drops or 0) + 1
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                table.insert(lootDB.items, { name=itemName, id=itemId, quality=quality, drops=1 })
+                newItems = newItems + 1
+            end
+        end
+    end
+
+    local kills = lootDB.kills
+    local suffix = newItems > 0 and (" |cff00ff00+" .. newItems .. " novo(s)|r") or ""
+    DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Loot de |cffff8000" .. mobName .. "|r registrado" .. suffix .. " — " .. kills .. " kill(s) total.")
+
+    -- Compartilha com outros jogadores com o addon
+    if RareTrackerSW_Sync then
+        RareTrackerSW_Sync:SendLoot(mobName, lootDB)
+    end
+
+    -- Atualiza a aba Loot DB se estiver aberta
+    if RareTrackerSW_Menu and RareTrackerSW_Menu:IsShown()
+    and RareTrackerSW_Menu.activeTab == "loot" then
+        RareTrackerSW_Menu:RefreshLootDB()
+    end
+end)
 

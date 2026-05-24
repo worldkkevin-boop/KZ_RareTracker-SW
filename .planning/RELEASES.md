@@ -6,7 +6,7 @@
 |-------|------|--------------|
 | KZ Guide MEGA PT-BR | https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR | 1.1.0 |
 | KZ ItemEP | https://github.com/worldkkevin-boop/KZ_ItemEP | 1.2.0 |
-| KZ RareTracker-SW | https://github.com/worldkkevin-boop/RareTracker-SW | 1.2.0 |
+| KZ RareTracker-SW | https://github.com/worldkkevin-boop/RareTracker-SW | 1.3.0 |
 | KZ Translator | — (ainda não publicado) | 0.1.0-Beta |
 
 **GitAddonsManager URL (KZ Guide):**
@@ -67,7 +67,9 @@ Antes de fazer push para o GitHub:
 
 | Versão | Data | Tipo | O que mudou |
 |--------|------|------|-------------|
-| 1.2.0 | — | MINOR | Versão atual |
+| 1.3.0 | 2026-05-24 | MINOR | Multi-spawn points via pfQuest DB + hover highlight nos pins do mapa |
+| 1.2.1 | — | PATCH | SuperWoW enhancements |
+| 1.2.0 | — | MINOR | Versão anterior |
 
 ### KZ Translator
 

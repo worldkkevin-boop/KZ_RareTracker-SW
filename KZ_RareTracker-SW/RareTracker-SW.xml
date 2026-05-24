@@ -1,0 +1,10 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+  <!-- Scripts are loaded via .toc file to avoid double-loading and order conflicts -->
+  
+  <Frame name="RareTrackerSW_UI_Parent">
+    <!-- Reserved for future UI templates -->
+  </Frame>
+
+</Ui>
