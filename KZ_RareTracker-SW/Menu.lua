@@ -745,6 +745,9 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
     self.detailScroll:UpdateScrollChildRect()
 end
 
+-- estado de expand por mob (persiste enquanto o menu está aberto)
+local RTSW_LootExpanded = {}
+
 function RareTrackerSW_Menu:RefreshLootDB()
     local content = self.lootContent
     if not content then return end
@@ -754,7 +757,7 @@ function RareTrackerSW_Menu:RefreshLootDB()
         r:EnableMouse(false)
         r:SetScript("OnEnter", nil)
         r:SetScript("OnLeave", nil)
-        if r.isBtn then r:SetScript("OnClick", nil) end
+        r:SetScript("OnClick", nil)
     end
 
     local totalMobs, totalKills, totalItems = 0, 0, 0
@@ -775,19 +778,30 @@ function RareTrackerSW_Menu:RefreshLootDB()
             totalKills .. " kills  |cffffff00" .. totalItems .. " itens únicos|r")
     end
 
-    local lines = {}
     local qualHex = {[0]="999999",[1]="ffffff",[2]="1eff00",[3]="0070dd",[4]="a335ee",[5]="ff8000"}
     table.sort(sorted, function(a, b) return (a[2].kills or 0) > (b[2].kills or 0) end)
+
+    -- Monta linhas: cabeçalho do mob + itens só se expandido
+    local lines = {}
     for _, entry in ipairs(sorted) do
         local n, d = entry[1], entry[2]
-        table.insert(lines, { text="|cffff8000" .. n .. "|r  |cffaaaaaa" .. (d.kills or 0) .. " kills|r", h=22 })
-        if d.items then
+        local expanded = RTSW_LootExpanded[n]
+        local arrow = expanded and "|cffaaaaaa▼|r " or "|cffaaaaaa▶|r "
+        local itemCount = d.items and table.getn(d.items) or 0
+        local countStr = itemCount > 0 and ("|cffaaaaaa (" .. itemCount .. " itens)|r") or ""
+        table.insert(lines, {
+            text    = arrow .. "|cffff8000" .. n .. "|r  |cff00ff00" .. (d.kills or 0) .. " kills|r" .. countStr,
+            h       = 24,
+            isMob   = true,
+            mobName = n,
+        })
+        if expanded and d.items then
             for _, item in ipairs(d.items) do
                 local hex = qualHex[item.quality or 1] or "ffffff"
                 local pct = (d.kills and d.kills > 0) and math.floor((item.drops or 1) / d.kills * 100) or 0
                 table.insert(lines, {
-                    text = "    |cff" .. hex .. (item.name or "?") .. "|r  |cffaaaaaa(" .. (item.drops or 1) .. "x · " .. pct .. "%)|r",
-                    h = 20,
+                    text     = "    |cff" .. hex .. (item.name or "?") .. "|r  |cffaaaaaa(" .. (item.drops or 1) .. "x · " .. pct .. "%)|r",
+                    h        = 20,
                     itemId   = item.id,
                     itemName = item.name,
                 })
@@ -799,7 +813,6 @@ function RareTrackerSW_Menu:RefreshLootDB()
         local row = content.rows[1]
         if not row then
             row = CreateFrame("Button", nil, content)
-            row.isBtn = true
             row:SetWidth(510) row:SetHeight(30)
             row.fs = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             row.fs:SetPoint("LEFT", row, "LEFT", 8, 0)
@@ -818,7 +831,6 @@ function RareTrackerSW_Menu:RefreshLootDB()
         local row = content.rows[i]
         if not row then
             row = CreateFrame("Button", nil, content)
-            row.isBtn = true
             row:SetWidth(510)
             row.fs = row:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             row.fs:SetPoint("LEFT", row, "LEFT", 8, 0)
@@ -828,11 +840,25 @@ function RareTrackerSW_Menu:RefreshLootDB()
         row:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -yOff)
         row:SetHeight(line.h)
         row.fs:SetText(line.text)
+        row:EnableMouse(true)
 
-        local itemId   = line.itemId
-        local itemName = line.itemName
-        if itemId then
-            row:EnableMouse(true)
+        if line.isMob then
+            -- clique no mob: toggle expand/collapse
+            local mobName = line.mobName
+            row:SetScript("OnClick", function()
+                RTSW_LootExpanded[mobName] = not RTSW_LootExpanded[mobName]
+                RareTrackerSW_Menu:RefreshLootDB()
+            end)
+            row:SetScript("OnEnter", function()
+                this.fs:SetText(string.gsub(this.fs:GetText(), "^|cffaaaaaa[▶▼]|r ", "|cffffff00" .. (RTSW_LootExpanded[mobName] and "▼" or "▶") .. "|r "))
+            end)
+            row:SetScript("OnLeave", function()
+                this.fs:SetText(line.text)
+            end)
+        elseif line.itemId then
+            -- clique no item: abre classicdb / tooltip
+            local itemId   = line.itemId
+            local itemName = line.itemName
             if itemId ~= "0" then
                 row:SetScript("OnEnter", function()
                     GameTooltip:SetOwner(this, "ANCHOR_LEFT")
@@ -851,6 +877,8 @@ function RareTrackerSW_Menu:RefreshLootDB()
                 row:SetScript("OnClick", nil)
             end
             row:SetScript("OnLeave", function() GameTooltip:Hide() end)
+        else
+            row:EnableMouse(false)
         end
 
         row:Show()
