@@ -3,6 +3,58 @@ RareTrackerSW_Menu = CreateFrame("Frame", "RTSW_FinalFrame", UIParent)
 RareTrackerSW_Timers = RareTrackerSW_Timers or {}
 RareTrackerSW_AlliedMobs = RareTrackerSW_AlliedMobs or {}
 
+-- ===== HOVER TIP (fundo sólido, substituindo GameTooltip) =====
+local RTSW_HoverFrame = nil
+
+local function RTSW_GetHoverFrame()
+    if RTSW_HoverFrame then return RTSW_HoverFrame end
+    local f = CreateFrame("Frame", "RTSW_HoverTip", UIParent)
+    f:SetFrameStrata("TOOLTIP")
+    f:SetWidth(240)
+    f:SetBackdrop({
+        bgFile   = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    f:SetBackdropColor(0.05, 0.03, 0.01, 1.0)
+    f:SetBackdropBorderColor(0.8, 0.7, 0.2, 1.0)
+    f:Hide()
+    f.fsList = {}
+    RTSW_HoverFrame = f
+    return f
+end
+
+local function RTSW_ShowHoverTip(anchor, textLines)
+    local f = RTSW_GetHoverFrame()
+    local PAD_X, PAD_TOP, PAD_BOT, LINE_H = 8, 7, 7, 14
+    local yOff = PAD_TOP
+    for i, t in ipairs(textLines) do
+        local fs = f.fsList[i]
+        if not fs then
+            fs = f:CreateFontString(nil, "OVERLAY", i == 1 and "GameFontNormal" or "GameFontNormalSmall")
+            fs:SetWidth(222) fs:SetJustifyH("LEFT")
+            f.fsList[i] = fs
+        end
+        fs:ClearAllPoints()
+        fs:SetPoint("TOPLEFT", f, "TOPLEFT", PAD_X, -yOff)
+        fs:SetText(t)
+        fs:Show()
+        yOff = yOff + (i == 1 and LINE_H + 2 or LINE_H)
+    end
+    for i = table.getn(textLines) + 1, table.getn(f.fsList) do
+        f.fsList[i]:Hide()
+    end
+    f:SetHeight(yOff + PAD_BOT)
+    f:ClearAllPoints()
+    f:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -6, 0)
+    f:Show()
+end
+
+local function RTSW_HideHoverTip()
+    if RTSW_HoverFrame then RTSW_HoverFrame:Hide() end
+end
+
 -- ===== EXPORT / IMPORT (formato RTSW1) =====
 function RTSW_GenerateExportCode()
     if not RareTrackerSW_LootDB then return "RTSW1" end
@@ -679,12 +731,7 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
             b:SetScript("OnEnter", function()
                 local c = pinColors[d.type] or pinColors.rare
                 local hex = string.format("%02x%02x%02x", c[1]*255, c[2]*255, c[3]*255)
-                GameTooltip:SetOwner(this, "ANCHOR_LEFT")
-                GameTooltip:SetText("|cff" .. hex .. n .. "|r")
-
                 local typeNames = { rare="Raro", rareelite="Raro Elite", elite="Elite", worldboss="World Boss", custom="Custom" }
-                GameTooltip:AddLine("Nível: |cffffffff" .. (d.level or "??") .. "|r")
-                GameTooltip:AddLine("Tipo: |cffffcc00" .. (typeNames[d.type] or "Raro") .. "|r")
 
                 local t2 = RareTrackerSW_Timers[n] or 0
                 local dead = (t2 > time())
@@ -692,7 +739,11 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
                 if dead and RareTrackerSW_Killers and RareTrackerSW_Killers[n] then
                     st = st .. " |cffaaaaaa(por " .. RareTrackerSW_Killers[n] .. ")|r"
                 end
-                GameTooltip:AddLine("Status: " .. st)
+
+                local lines = {}
+                table.insert(lines, "|cff" .. hex .. n .. "|r")
+                table.insert(lines, "Nível: |cffffffff" .. (d.level or "??") .. "|r   Tipo: |cffffcc00" .. (typeNames[d.type] or "Raro") .. "|r")
+                table.insert(lines, "Status: " .. st)
 
                 if dead then
                     local rem = t2 - time()
@@ -700,41 +751,41 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
                     local m2 = math.floor(math.mod(rem, 3600) / 60)
                     local s2 = math.floor(math.mod(rem, 60))
                     local tt = (h > 0) and (h.."h "..m2.."m") or (m2 > 0) and (m2.."m "..s2.."s") or (s2.."s")
-                    GameTooltip:AddLine("Renasce em: |cff00ff00" .. tt .. "|r")
+                    table.insert(lines, "Renasce em: |cff00ff00" .. tt .. "|r")
                 else
-                    GameTooltip:AddLine("Respawn: |cff66ff66" .. (d.respawn or "Desconhecido") .. "|r")
+                    table.insert(lines, "Respawn: |cff66ff66" .. (d.respawn or "?") .. "|r")
                 end
 
                 local fac = d.faction or "N"
                 local reactText = "|cffffff00N|r"
-                if fac == "A" then
-                    reactText = (pFac == "Alliance") and "|cff3366ffA|r" or "|cffff2222A|r"
-                elseif fac == "H" then
-                    reactText = (pFac == "Horde") and "|cff3366ffH|r" or "|cffff2222H|r"
-                end
-                GameTooltip:AddLine("Reação: " .. reactText)
+                if fac == "A" then reactText = (pFac == "Alliance") and "|cff3366ffA|r" or "|cffff2222A|r"
+                elseif fac == "H" then reactText = (pFac == "Horde") and "|cff3366ffH|r" or "|cffff2222H|r" end
+                table.insert(lines, "Reação: " .. reactText .. "   ID: |cff999999" .. (d.id or "0") .. "|r")
+
                 if d.x and d.y then
-                    GameTooltip:AddLine("Local: |cffffffff" .. string.format("%.1f, %.1f", d.x*100, d.y*100) .. "|r")
+                    table.insert(lines, "Local: |cffffffff" .. string.format("%.1f, %.1f", d.x*100, d.y*100) .. "|r")
                 end
-                GameTooltip:AddLine("ID: |cff999999" .. (d.id or "0") .. "|r")
 
                 local lvl = tonumber(d.level) or 60
                 local hpMult = (d.type=="worldboss" and 5000) or (d.type=="rareelite" and 250) or (d.type=="elite" and 180) or 120
-                GameTooltip:AddLine("Vida: |cffff4444~" .. lvl*hpMult .. " (Est.)|r")
+                table.insert(lines, "Vida: |cffff8888~" .. lvl*hpMult .. " (Est.)|r")
 
                 local loot = RareTrackerSW_Loot and RareTrackerSW_Loot[n]
                 if loot and table.getn(loot) > 0 then
-                    GameTooltip:AddLine(" ")
-                    GameTooltip:AddLine("Loot:")
+                    table.insert(lines, " ")
+                    table.insert(lines, "|cffffcc00Loot:|r")
+                    local qualHex = {[0]="999999",[1]="ffffff",[2]="1eff00",[3]="0070dd",[4]="a335ee",[5]="ff8000"}
                     for _, litem in ipairs(loot) do
-                        GameTooltip:AddLine("  " .. litem.name .. " |cff888888(" .. litem.chance .. ")|r", 1, 0.82, 0)
+                        local qh = qualHex[litem.quality or 1] or "ffffff"
+                        table.insert(lines, "  |cff" .. qh .. litem.name .. "|r |cff888888(" .. litem.chance .. ")|r")
                     end
                 end
-                GameTooltip:AddLine(" ")
-                GameTooltip:AddLine("|cffaaaaaaShift+Clique para marcar MORTO|r")
-                GameTooltip:Show()
+
+                table.insert(lines, " ")
+                table.insert(lines, "|cffaaaaaaShift+Clique para marcar MORTO|r")
+                RTSW_ShowHoverTip(this, lines)
             end)
-            b:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            b:SetScript("OnLeave", function() RTSW_HideHoverTip() end)
 
             b:Show()
             table.insert(self.detailPanel.mobs, b)
