@@ -374,7 +374,6 @@ function RareTrackerSW_Menu:Init()
         { key="elite",     label="|cffff8800Elite|r" },
         { key="worldboss", label="|cffff3333World Boss|r" },
         { key="custom",    label="|cffcc44ffCustom|r" },
-        { key="turtlewow", label="|cff00e680Turtle WoW|r" },
     }
     local tfCols, tfW = 3, 175
     self.typeFilterCBs = {}
@@ -608,7 +607,6 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
         elite     = "Interface\\Icons\\INV_Misc_Head_Dragon_01",
         worldboss = "Interface\\Icons\\INV_Misc_Head_Dragon_01",
         custom    = "Interface\\Icons\\INV_Misc_MonsterScales_13",
-        turtlewow = "Interface\\Icons\\INV_Misc_MonsterScales_13",
     }
     local pinColors = {
         rare      = {1, 1, 1},
@@ -616,14 +614,11 @@ function RareTrackerSW_Menu:ShowZoneDetails(zone, filter)
         elite     = {1, 0.8, 0},
         worldboss = {1, 0.2, 0.2},
         custom    = {0.8, 0, 1},
-        turtlewow = {0, 0.9, 0.5},
     }
     local function GetDisplayType(mob, name)
         if not mob then return "rare" end
         if mob.type == "custom" then return "custom" end
         local id = tonumber(mob.id) or 0
-        if id >= 40000 then return "turtlewow" end
-        if name and RareTrackerSW_Loot and RareTrackerSW_Loot[name] then return "turtlewow" end
         return mob.type or "rare"
     end
 
