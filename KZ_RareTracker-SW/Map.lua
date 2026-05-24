@@ -29,7 +29,6 @@ local pinTypeConfig = {
     elite     = { r=1,    g=0.4,  b=0,    size=20, mmSize=14 },  -- Laranja
     worldboss = { r=1,    g=0,    b=0,    size=26, mmSize=18 },  -- Vermelho puro
     custom    = { r=0.8,  g=0,    b=1,    size=18, mmSize=13 },  -- Roxo
-    turtlewow = { r=0,    g=1,    b=0.3,  size=18, mmSize=13 },  -- Teal
 }
 
 -- ============================================================
@@ -182,7 +181,6 @@ local pinColors = {
     elite     = {1, 0.55, 0},
     worldboss = {1, 0.1, 0.1},
     custom    = {0.8, 0.3, 1},
-    turtlewow = {0, 0.9, 0.5},
 }
 
 local function RTSW_DiffColor(mobLevel)
@@ -700,7 +698,6 @@ local typeRows = {
     { key = "elite",     label = "|cFFFF8800★|r Elites"      },
     { key = "worldboss", label = "|cFFFF3333★|r World Boss"  },
     { key = "custom",    label = "|cFFCC44FF★|r Custom"      },
-    { key = "turtlewow", label = "|cFF00E680★|r Turtle WoW"  },
 }
 
 local tpChecks = {}
@@ -1077,7 +1074,7 @@ function RTSW_OpenQuickPanel(pin)
         end
     end
 
-    local typeNames = { rare="Raro", rareelite="Raro Elite", elite="Elite", worldboss="World Boss", custom="Custom", turtlewow="Turtle WoW" }
+    local typeNames = { rare="Raro", rareelite="Raro Elite", elite="Elite", worldboss="World Boss", custom="Custom" }
     addLine("Nível: |cffffffff" .. (d.level or "??") .. "|r   Tipo: |cffffcc00" .. (typeNames[d.type] or "Raro") .. "|r")
 
     local lvl    = tonumber(d.level) or 60
