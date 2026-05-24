@@ -6,7 +6,7 @@
 |-------|------|--------------|
 | KZ Guide MEGA PT-BR | https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR | 1.1.0 |
 | KZ ItemEP | https://github.com/worldkkevin-boop/KZ_ItemEP | 1.2.0 |
-| KZ RareTracker-SW | https://github.com/worldkkevin-boop/RareTracker-SW | 1.3.0 |
+| KZ RareTracker-SW | https://github.com/worldkkevin-boop/KZ_RareTracker-SW | 1.3.0 |
 | KZ Translator | — (ainda não publicado) | 0.1.0-Beta |
 
 **GitAddonsManager URL (KZ Guide):**
@@ -83,27 +83,54 @@ Antes de fazer push para o GitHub:
 
 ```
 🍺 KZ Addons — PT-BR para SandWorlds
+Olá aventureiros! Desenvolvemos uma coleção de addons gratuitos e em português para o servidor SandWorlds.
 
-Olá aventureiros! Desenvolvemos uma coleção de addons gratuitos e em português
-para o servidor SandWorlds. Confira abaixo:
+🛠️ Como instalar
+1. Baixe o GitAddonsManager: https://woblight.gitlab.io/overview/gitaddonsmanager/
+2. Cole o link abaixo — ele instala tudo automaticamente:
+https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR.git
+
+---
 
 📖 KZ Guide MEGA PT-BR
 Guias completos de leveling, profissões, masmorras e endgame — tudo em português!
 🔗 https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR
 
 ⚔️ KZ ItemEP
-Calculadora de EP (Equipment Points) no tooltip dos itens.
-Veja a nota do item (SS/S/A/B/C...) e compare com o que você está usando!
+Calculadora de EP (Equipment Points) no tooltip dos itens. Veja a nota do item (SS/S/A/B/C...) e compare com o que você está usando!
 🔗 https://github.com/worldkkevin-boop/KZ_ItemEP
 
-🗺️ RareTracker-SW
+🗺️ KZ RareTracker-SW
 Tracker de mobs raros no minimapa com alertas e sincronização entre jogadores!
-🔗 https://github.com/worldkkevin-boop/RareTracker-SW
-
-🛠️ Como instalar
-Use o GitAddonsManager e cole o link abaixo — ele instala tudo automaticamente:
-https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR.git
+🔗 https://github.com/worldkkevin-boop/KZ_RareTracker-SW
 
 ☕ Gostou? Me paga um café!
+👉 https://ko-fi.com/worldkkevingmailcom
+
+---
+
+🇺🇸 English
+🍺 KZ Addons — PT-BR for SandWorlds
+Hey adventurers! We've developed a collection of free addons in Brazilian Portuguese for the SandWorlds server.
+
+🛠️ How to install
+Use GitAddonsManager and paste the link below — it installs everything automatically:
+https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR.git
+
+---
+
+📖 KZ Guide MEGA PT-BR
+Complete leveling, professions, dungeons and endgame guides — all in Portuguese!
+🔗 https://github.com/worldkkevin-boop/KZ_Guide_MEGA_PTBR
+
+⚔️ KZ ItemEP
+Item EP (Equipment Points) calculator in the item tooltip. See the item grade (SS/S/A/B/C...) and compare with your equipped gear!
+🔗 https://github.com/worldkkevin-boop/KZ_ItemEP
+
+🗺️ KZ RareTracker-SW
+Rare mob tracker on the minimap with kill alerts and player synchronization!
+🔗 https://github.com/worldkkevin-boop/KZ_RareTracker-SW
+
+☕ Enjoy the addons? Buy me a coffee!
 👉 https://ko-fi.com/worldkkevingmailcom
 ```
