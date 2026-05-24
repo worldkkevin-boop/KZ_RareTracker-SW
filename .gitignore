@@ -1,0 +1,23 @@
+﻿# Ferramentas de desenvolvimento
+.planning/
+.agent/
+.claude/
+scratch/
+dist/
+docs/
+dashboard/
+node_modules/
+skills/
+squads/
+_opensquad/
+
+# Scripts de build
+check_syntax.js
+generate_db.js
+package.json
+package-lock.json
+
+# Arquivos de sistema
+desktop.ini
+Thumbs.db
+*.log

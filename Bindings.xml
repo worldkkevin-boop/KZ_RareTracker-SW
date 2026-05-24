@@ -1,0 +1,4 @@
+﻿<Bindings>
+    <Binding name="RTSW_TOGGLE" header="RTSW">
+    </Binding>
+</Bindings>
