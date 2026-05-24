@@ -269,7 +269,10 @@ function RareTrackerSW_Menu:Init()
         getglobal(cbName.."Text"):SetText(text)
         cb:SetChecked(getglobal(var))
         cb:SetScript("OnClick", function()
-            setglobal(var, this:GetChecked() and true or false)
+            local on = this:GetChecked() and true or false
+            setglobal(var, on)
+            local estado = on and "|cff00ff00ATIVADO|r" or "|cffff4444DESATIVADO|r"
+            DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r " .. text .. ": " .. estado)
             if RareTrackerSW_Map and RareTrackerSW_Map.UpdateWorldMap then RareTrackerSW_Map:UpdateWorldMap() end
         end)
     end
@@ -278,23 +281,24 @@ function RareTrackerSW_Menu:Init()
     CreateCB("Som Ativado",      "RareTrackerSW_SoundEnabled",  10,  -38)
     CreateCB("Mostrar Mortos",   "RareTrackerSW_ShowDeadOnMap", 280, -10)
     CreateCB("Esconder Aliados", "RareTrackerSW_HideAllied",    280, -38)
+    CreateCB("Mensagens no Chat","RareTrackerSW_ChatEnabled",   280, -66)
 
     local cfgDiv = configPanel:CreateTexture(nil, "ARTWORK")
     cfgDiv:SetTexture(0.8, 0.7, 0.2, 0.35)
     cfgDiv:SetHeight(1) cfgDiv:SetWidth(540)
-    cfgDiv:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -70)
+    cfgDiv:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -95)
 
     local cfgBtns = {
         { text="Sincronizar Agora", fn=function()
             if RareTrackerSW_Sync then
                 RareTrackerSW_Sync:SendRequest()
-                DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Pedindo timers do canal...")
+                if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Pedindo timers do canal...") end
             end
         end},
         { text="Verificar Versao", fn=function()
             if RareTrackerSW_Sync then
                 RareTrackerSW_Sync:SendVersion()
-                DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Verificando versoes... (v" .. (RTSW_VERSION or "?") .. ")")
+                if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Verificando versoes... (v" .. (RTSW_VERSION or "?") .. ")") end
             end
         end},
         { text="Compartilhar Raros", fn=function()
@@ -302,7 +306,7 @@ function RareTrackerSW_Menu:Init()
                 RareTrackerSW_Sync:BroadcastDB()
                 local count = 0
                 if RareTrackerSW_DB then for z, mobs in pairs(RareTrackerSW_DB) do for n in pairs(mobs) do count = count + 1 end end end
-                DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Compartilhando " .. count .. " raros!")
+                if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Compartilhando " .. count .. " raros!") end
             end
         end},
         { text="? Ajuda", fn=function() RareTrackerSW_Menu:ToggleHelp() end},
@@ -318,7 +322,7 @@ function RareTrackerSW_Menu:Init()
         local row = math.floor((i-1) / cols)
         local btn = CreateFrame("Button", nil, configPanel, "UIPanelButtonTemplate")
         btn:SetWidth(btnW) btn:SetHeight(btnH)
-        btn:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10 + col*(btnW+5), -80 - row*34)
+        btn:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10 + col*(btnW+5), -105 - row*34)
         btn:SetText(bd.text)
         btn:SetScript("OnClick", bd.fn)
     end
@@ -327,18 +331,18 @@ function RareTrackerSW_Menu:Init()
     local typeDiv2 = configPanel:CreateTexture(nil, "ARTWORK")
     typeDiv2:SetTexture(0.8, 0.7, 0.2, 0.3)
     typeDiv2:SetHeight(1) typeDiv2:SetWidth(540)
-    typeDiv2:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -155)
+    typeDiv2:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -180)
 
     local typeLabel = configPanel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    typeLabel:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -165)
+    typeLabel:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -190)
     typeLabel:SetText("|cffffcc00Filtros de Tipo no Mapa:|r")
 
     local typeFilterDefs = {
-        { key="rare",      label="|cffff66ccRaro|r" },
-        { key="rareelite", label="|cff66aaffRaro Elite|r" },
+        { key="rare",      label="|cff1eff00Raro|r" },
+        { key="rareelite", label="|cff0070ddRaro Elite|r" },
         { key="elite",     label="|cffff8800Elite|r" },
         { key="worldboss", label="|cffff3333World Boss|r" },
-        { key="custom",    label="|cffcc66ffCustom|r" },
+        { key="custom",    label="|cffcc44ffCustom|r" },
         { key="turtlewow", label="|cff00e680Turtle WoW|r" },
     }
     local tfCols, tfW = 3, 175
@@ -349,7 +353,7 @@ function RareTrackerSW_Menu:Init()
         local cbName = "RTSW_TypeCB_" .. td.key
         local cb = CreateFrame("CheckButton", cbName, configPanel, "UICheckButtonTemplate")
         cb:SetWidth(20) cb:SetHeight(20)
-        cb:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10 + col*(tfW+5), -183 - row*24)
+        cb:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10 + col*(tfW+5), -208 - row*24)
         getglobal(cbName.."Text"):SetText(td.label)
         -- Checked por padrão (sem ShowTypes = tudo visível)
         cb:SetChecked(not RareTrackerSW_ShowTypes or RareTrackerSW_ShowTypes[td.key] ~= false)
@@ -366,7 +370,7 @@ function RareTrackerSW_Menu:Init()
     local cbDeadName = "RTSW_TypeCB_Dead"
     local cbDeadMap = CreateFrame("CheckButton", cbDeadName, configPanel, "UICheckButtonTemplate")
     cbDeadMap:SetWidth(20) cbDeadMap:SetHeight(20)
-    cbDeadMap:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -234)
+    cbDeadMap:SetPoint("TOPLEFT", configPanel, "TOPLEFT", 10, -259)
     getglobal(cbDeadName.."Text"):SetText("Mostrar Mortos no Mapa")
     cbDeadMap:SetChecked(RareTrackerSW_ShowDeadOnMap ~= false)
     cbDeadMap:SetScript("OnClick", function()
@@ -1070,7 +1074,7 @@ function RareTrackerSW_Menu:CreateImportPopup()
     doBtn:SetScript("OnClick", function()
         local code = RTSW_ImportEB:GetText()
         local count = RTSW_ImportCode(code)
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Importado! |cffffff00" .. count .. "|r itens novos adicionados.")
+        if RareTrackerSW_ChatEnabled ~= false then DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Importado! |cffffff00" .. count .. "|r itens novos adicionados.") end
         f:Hide()
         if RareTrackerSW_Menu.activeTab == "loot" then
             RareTrackerSW_Menu:RefreshLootDB()

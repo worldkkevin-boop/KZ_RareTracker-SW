@@ -11,6 +11,17 @@ RareTrackerSW_Timers = RareTrackerSW_Timers or {}
 RareTrackerSW_Killers = RareTrackerSW_Killers or {}
 RareTrackerSW_Ranks = RareTrackerSW_Ranks or {}
 RareTrackerSW_DB = RareTrackerSW_DB or {}
+if RareTrackerSW_ChatEnabled    == nil then RareTrackerSW_ChatEnabled    = true end
+if RareTrackerSW_AlertEnabled   == nil then RareTrackerSW_AlertEnabled   = true end
+if RareTrackerSW_SoundEnabled   == nil then RareTrackerSW_SoundEnabled   = true end
+if RareTrackerSW_ShowDeadOnMap  == nil then RareTrackerSW_ShowDeadOnMap  = true end
+if RareTrackerSW_HideAllied     == nil then RareTrackerSW_HideAllied     = false end
+
+local function RTSW_Chat(msg)
+    if RareTrackerSW_ChatEnabled ~= false then
+        DEFAULT_CHAT_FRAME:AddMessage(msg)
+    end
+end
 RareTrackerSW = CreateFrame("Frame", "RareTrackerSWFrame")
 
 
@@ -263,7 +274,7 @@ function RareTrackerSW:OnSync(prefix, msg, channel, sender)
                            (RareTrackerSW_DB and RareTrackerSW_DB[zone2] and RareTrackerSW_DB[zone2][name])
                 if md then respawnStr = md.respawn or "?" end
             end
-            DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RT Sync]|r |cffff8000" .. name .. "|r morto por |cff00ff00" .. sender .. "|r! Respawn: |cffffff00" .. respawnStr .. "|r")
+            RTSW_Chat("|cff00ffff[RT Sync]|r |cffff8000" .. name .. "|r morto por |cff00ff00" .. sender .. "|r! Respawn: |cffffff00" .. respawnStr .. "|r")
 
             if RareTrackerSW_Menu and RareTrackerSW_Menu:IsShown() then
                 local currentZone = GetRealZoneText()
@@ -339,7 +350,7 @@ function RareTrackerSW:AddCurrentTargetToDB()
 
     local coords = string.format("%.1f, %.1f", x*100, y*100)
     local spawnCount = existing and existing.spawns and table.getn(existing.spawns) or 1
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[RT]|r " .. name .. " spawn salvo em " .. zone .. " (" .. coords .. ") — total: " .. spawnCount .. " ponto(s)")
+    RTSW_Chat("|cff00ff00[RT]|r " .. name .. " spawn salvo em " .. zone .. " (" .. coords .. ") — total: " .. spawnCount .. " ponto(s)")
 
     RareTrackerSW:BuildLookup()
 
@@ -386,7 +397,7 @@ function RareTrackerSW:UpdateMobPosition(name, zone)
     end
 
     local coords = string.format("%.1f, %.1f", x*100, y*100)
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ff00[RT]|r " .. name .. " posicao salva em " .. coords)
+    RTSW_Chat("|cff00ff00[RT]|r " .. name .. " posicao salva em " .. coords)
 
     -- Compartilhar posicao com outros jogadores
     if RareTrackerSW_Sync and RareTrackerSW_Sync.SendFound then
@@ -428,7 +439,7 @@ RTSW_DeathFrame:SetScript("OnEvent", function()
                     local timer = RareTrackerSW_Timers and RareTrackerSW_Timers[realName] or 0
                     if timer < time() then
                         RareTrackerSW:RecordDeath(realName)
-                        DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Cadaver de |cffff8000" .. realName .. "|r encontrado. Registrando morte...")
+                        RTSW_Chat("|cff00ffff[RareTracker]|r Cadaver de |cffff8000" .. realName .. "|r encontrado. Registrando morte...")
                     end
                 end
             else
@@ -455,7 +466,7 @@ RTSW_DeathFrame:SetScript("OnEvent", function()
                 local _, _, rn = RareTrackerSW:IsRare(deadName)
                 if (rn or deadName) == RTSW_ActiveRare then
                     RareTrackerSW:RecordDeath(RTSW_ActiveRare)
-                    DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cffff8000" .. RTSW_ActiveRare .. "|r morto! Sincronizando...")
+                    RTSW_Chat("|cff00ffff[RareTracker]|r |cffff8000" .. RTSW_ActiveRare .. "|r morto! Sincronizando...")
                     RTSW_ActiveRare = nil
                     if RareTrackerSW_Map and RareTrackerSW_Map.HideTargetPin then
                         RareTrackerSW_Map:HideTargetPin()
@@ -496,7 +507,7 @@ if SUPERWOW_VERSION then
             -- Só registrar se não foi o UNIT_DIED normal que já pegou (evita duplicata)
             if dyingName and dyingName ~= RTSW_ActiveRare then
                 RareTrackerSW:RecordDeath(dyingName)
-                DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cffff8000" .. dyingName .. "|r abatido perto de voce. |cffaaaaaa(deteccao passiva)|r")
+                RTSW_Chat("|cff00ffff[RareTracker]|r |cffff8000" .. dyingName .. "|r abatido perto de voce. |cffaaaaaa(deteccao passiva)|r")
                 if RareTrackerSW_Map and RareTrackerSW_Map.HideTargetPin then
                     RareTrackerSW_Map:HideTargetPin()
                 end
@@ -523,7 +534,7 @@ if SUPERWOW_VERSION then
                                     RareTrackerSW_Alert:ShowAlert(name)
                                     RareTrackerSW_AlertCooldowns[name] = GetTime() + 600
                                 end
-                                DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r |cffff8000" .. name .. "|r detectado nas redondezas! |cffaaaaaa(via cast)|r")
+                                RTSW_Chat("|cff00ffff[RareTracker]|r |cffff8000" .. name .. "|r detectado nas redondezas! |cffaaaaaa(via cast)|r")
                             end
                             if RareTrackerSW_Map and RareTrackerSW_Map.ShowTargetPin then
                                 RareTrackerSW_Map:ShowTargetPin(name)
@@ -603,7 +614,7 @@ RTSW_LootFrame:SetScript("OnEvent", function()
 
     local kills = lootDB.kills
     local suffix = newItems > 0 and (" |cff00ff00+" .. newItems .. " novo(s)|r") or ""
-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ffff[RareTracker]|r Loot de |cffff8000" .. mobName .. "|r registrado" .. suffix .. " — " .. kills .. " kill(s) total.")
+    RTSW_Chat("|cff00ffff[RareTracker]|r Loot de |cffff8000" .. mobName .. "|r registrado" .. suffix .. " — " .. kills .. " kill(s) total.")
 
     -- Compartilha com outros jogadores com o addon
     if RareTrackerSW_Sync then
